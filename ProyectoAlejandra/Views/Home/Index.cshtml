@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<ejs-grid id="Grid" allowPaging="true" toolbar="@( new List<object>() {"Add","Edit","Delete","Update","Cancel"})">
+    <e-grid-editsettings allowAdding="true" allowDeleting="true" allowEditing="true" showDeleteConfirmDialog="true"></e-grid-editsettings>
+    <e-data-manager url="/Home/UrlDataSource" insertUrl="/Home/Insert" removeUrl="/Home/Delete" updateUrl="/Home/Update" adaptor="UrlAdaptor"></e-data-manager>
+    <e-grid-columns>
+        <e-grid-column field="Id" headerText="Id" isPrimaryKey="true" textAlign="Right" width="120"></e-grid-column>
+        <e-grid-column field="Rut" headerText="Rut" width="150" edit="@(new {create = "priceCreate", read = "priceRead", destroy = "priceDestroy", write = "priceWrite"})"></e-grid-column>
+        <e-grid-column field="Nombre" headerText="Nombre" allowEditing="false" textAlign="Right" width="120"></e-grid-column>
+        <e-grid-column field="Fecha" headerText="Fecha" customFormat="@(new { type ="dateTime", format="dd/MM/yyyy" })" editType="datepickeredit" width="170"></e-grid-column>
+        <e-grid-column field="Jubilado" headerText="City" width="150" editType="booleanedit" displayAsCheckBox="true"></e-grid-column>
+    </e-grid-columns>
+</ejs-grid>
+
+<script>var priceElem;
+    var priceObj;
+
+    function priceCreate(args) {
+        priceElem = document.createElement('input');
+        return priceElem;
+    }
+
+    function priceWrite(args) {
+
+        priceObj = new ej.inputs.TextBox({
+            value: args.rowData[args.column.field],
+            change: function (args) {
+                @*aca va tu logica para traer los datos del rut si se traen los datos se llena el campo nombre y se habilita*@
+
+                var formEle = document.getElementById("Grid").querySelector("form").ej2_instances[0];
+                var totalCostFieldEle = formEle.getInputElement('Nombre');
+                
+                totalCostFieldEle.value = "juan lobos";//aca se pone el valor que viene de tu base
+
+                document.getElementById('GridNombre')[enable ? 'removeAttribute' : 'setAttribute']('disabled', 'disabled');
+                ej.base[enable ? "removeClass" : "addClass"](document.querySelectorAll('#GridNombre'), 'e-disabled');
+                ej.base[enable ? "removeClass" : "addClass"]([document.querySelector('#GridNombre').closest('span')], ['e-disabled']) 
+
+            }
+        });
+        priceObj.appendTo(priceElem);
+    }
+
+    function priceDestroy() {
+        priceObj.destroy();
+    }
+
+    function priceRead(args) {
+        return priceObj.value;
+    }</script>
