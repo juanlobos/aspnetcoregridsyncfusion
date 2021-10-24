@@ -58,45 +58,6 @@ namespace ProyectoAlejandra.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult UrlDatasource([FromBody] DataManagerRequest dm)
-        {
-            //var order = Persona.GetAllRecords();
-            var order = _context.Persona.ToList();//aca traes la data de la base de datos o puedes inicializar una lista vacia
-            IEnumerable DataSource = order;
-
-            DataOperations operation = new DataOperations();
-            if (dm.Search != null && dm.Search.Count > 0)
-            {
-                DataSource = operation.PerformSearching(DataSource, dm.Search);  //Search
-            }
-            if (dm.Sorted != null && dm.Sorted.Count > 0) //Sorting
-            {
-                DataSource = operation.PerformSorting(DataSource, dm.Sorted);
-            }
-            if (dm.Where != null && dm.Where.Count > 0) //Filtering
-            {
-                DataSource = operation.PerformFiltering(DataSource, dm.Where, dm.Where[0].Operator);
-            }
-            int count = DataSource.Cast<Persona>().Count();
-            if (dm.Skip != 0)
-            {
-                DataSource = operation.PerformSkip(DataSource, dm.Skip);   //Paging
-            }
-            if (dm.Take != 0)
-            {
-                DataSource = operation.PerformTake(DataSource, dm.Take);
-            }
-            return dm.RequiresCounts ? new JsonResult(new { result = DataSource, count = count }) : new JsonResult(DataSource);
-        }
-
-
-        //public ActionResult Insert([FromBody] CRUDAction<Persona> value,string cadena)
-        //{
-        //    //Persona.GetAllRecords().Insert(0, value.value);
-        //    _context.Persona.Add(value.value);//inserto el registro en la base de datos
-        //    _context.SaveChanges();
-        //    return new JsonResult(value.value);
-        //}
 
 
 
@@ -128,26 +89,6 @@ namespace ProyectoAlejandra.Controllers
             return new JsonResult(value);
         }
 
-        public class CRUDAction<T> where T : class
-        {
-            public string action { get; set; }
-
-            public string table { get; set; }
-
-            public string keyColumn { get; set; }
-
-            public object key { get; set; }
-
-            public T value { get; set; }
-
-            public List<T> added { get; set; }
-
-            public List<T> changed { get; set; }
-
-            public List<T> deleted { get; set; }
-
-            public IDictionary<string, object> @params { get; set; }
-        }
-
+   
     }
 }

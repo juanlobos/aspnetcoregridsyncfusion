@@ -22,12 +22,12 @@
 
 
 <div id="tablaoculta" style="display:none;">
-    <ejs-grid id="Grid" load="load" allowPaging="true" toolbar="@( new List<object>() {"Add","Edit","Delete","Update","Cancel"})">
+    <ejs-grid id="Grid" load="load" allowPaging="true"  toolbar="@( new List<object>() {"Add","Edit","Delete","Update","Cancel"})">
         <e-grid-editsettings allowAdding="true" allowDeleting="true" allowEditing="true" showDeleteConfirmDialog="true"></e-grid-editsettings>
         <e-data-manager json="@ViewBag.data" adaptor="RemoteSaveAdaptor" url="/Home/UrlDataSource" insertUrl="/Home/Insert" removeUrl="/Home/Delete" updateUrl="/Home/Update"></e-data-manager>
         <e-grid-columns>
             <e-grid-column field="Id" headerText="Id" isPrimaryKey="true" textAlign="Right" width="120"></e-grid-column>
-            <e-grid-column field="Rut" headerText="Rut" width="150" validationRules="@(new{ required = true })" edit="@(new {create = "priceCreate", read = "priceRead", destroy = "priceDestroy", write = "priceWrite"})"></e-grid-column>
+            <e-grid-column field="Rut" headerText="Rut" width="150" edit="@(new {create = "priceCreate", read = "priceRead", destroy = "priceDestroy", write = "priceWrite"})"></e-grid-column>
             <e-grid-column field="Nombre" headerText="Nombre" allowEditing="false" textAlign="Right" width="120"></e-grid-column>
             <e-grid-column field="Fecha" headerText="Fecha" customFormat="@(new { type ="dateTime", format="dd/MM/yyyy" })" editType="datepickeredit" width="170"></e-grid-column>
             <e-grid-column field="Jubilado" headerText="City" width="150" editType="booleanedit" displayAsCheckBox="true"></e-grid-column>
@@ -35,6 +35,8 @@
     </ejs-grid>
 </div>
 <script>
+
+
     // aca va el evento para guardar los datos de cabecera y obtengo un valor que lo guardo en el campo oculto para utilizarlo al enviar los datos de detalle de la grilla
     $("#btnsave").click(function () {
         $.ajax({
@@ -149,4 +151,6 @@
 
     function load(args) {
         this.dataSource.adaptor = customAdaptor;
+        //aqui agregas todas las columnas a validar y mensaje personalizado
+        this.columns[1].validationRules = { required: [true, 'El campo es obligatorio'] };
     }</script>
