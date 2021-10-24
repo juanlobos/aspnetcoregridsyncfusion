@@ -2,24 +2,56 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!--aca irian los campos de la cabecera que vas a mandar al inicio-->
+<div class="container">
+    <div class="row">
+        <div class="col">
+           <input type="text" id="producto" class="form-control" placeholder="Ingrese producto"/>
+        </div>
+        <div class="col">
+            <input type="text" id="cantidad" class="form-control" placeholder="Ingrese cantidad" />
+        </div>
+        <!--aca va un buton para realizar el evento , pero puede ser otro evento para mandar los datos de  la cabecera-->
+        <div class="col">
+            <button id="btnsave" value="mostrar">Mostar</button>
+        </div>
+    </div>
 </div>
+<!--campo oculto que guardara el valor que devuelva la consulta de la cabecera-->
+<input type="hidden" id="idCodigo" />
 
-<ejs-grid id="Grid" allowPaging="true" toolbar="@( new List<object>() {"Add","Edit","Delete","Update","Cancel"})">
-    <e-grid-editsettings allowAdding="true" allowDeleting="true" allowEditing="true" showDeleteConfirmDialog="true"></e-grid-editsettings>
-    <e-data-manager url="/Home/UrlDataSource" insertUrl="/Home/Insert" removeUrl="/Home/Delete" updateUrl="/Home/Update" adaptor="UrlAdaptor"></e-data-manager>
-    <e-grid-columns>
-        <e-grid-column field="Id" headerText="Id" isPrimaryKey="true" textAlign="Right" width="120"></e-grid-column>
-        <e-grid-column field="Rut" headerText="Rut" width="150" edit="@(new {create = "priceCreate", read = "priceRead", destroy = "priceDestroy", write = "priceWrite"})"></e-grid-column>
-        <e-grid-column field="Nombre" headerText="Nombre" allowEditing="false" textAlign="Right" width="120"></e-grid-column>
-        <e-grid-column field="Fecha" headerText="Fecha" customFormat="@(new { type ="dateTime", format="dd/MM/yyyy" })" editType="datepickeredit" width="170"></e-grid-column>
-        <e-grid-column field="Jubilado" headerText="City" width="150" editType="booleanedit" displayAsCheckBox="true"></e-grid-column>
-    </e-grid-columns>
-</ejs-grid>
 
-<script>var priceElem;
+<div id="tablaoculta" style="display:none;">
+    <ejs-grid id="Grid" load="load" allowPaging="true" toolbar="@( new List<object>() {"Add","Edit","Delete","Update","Cancel"})">
+        <e-grid-editsettings allowAdding="true" allowDeleting="true" allowEditing="true" showDeleteConfirmDialog="true"></e-grid-editsettings>
+        <e-data-manager json="@ViewBag.data" adaptor="RemoteSaveAdaptor" url="/Home/UrlDataSource" insertUrl="/Home/Insert" removeUrl="/Home/Delete" updateUrl="/Home/Update"></e-data-manager>
+        <e-grid-columns>
+            <e-grid-column field="Id" headerText="Id" isPrimaryKey="true" textAlign="Right" width="120"></e-grid-column>
+            <e-grid-column field="Rut" headerText="Rut" width="150" validationRules="@(new{ required = true })" edit="@(new {create = "priceCreate", read = "priceRead", destroy = "priceDestroy", write = "priceWrite"})"></e-grid-column>
+            <e-grid-column field="Nombre" headerText="Nombre" allowEditing="false" textAlign="Right" width="120"></e-grid-column>
+            <e-grid-column field="Fecha" headerText="Fecha" customFormat="@(new { type ="dateTime", format="dd/MM/yyyy" })" editType="datepickeredit" width="170"></e-grid-column>
+            <e-grid-column field="Jubilado" headerText="City" width="150" editType="booleanedit" displayAsCheckBox="true"></e-grid-column>
+        </e-grid-columns>
+    </ejs-grid>
+</div>
+<script>
+    // aca va el evento para guardar los datos de cabecera y obtengo un valor que lo guardo en el campo oculto para utilizarlo al enviar los datos de detalle de la grilla
+    $("#btnsave").click(function () {
+        $.ajax({
+            'method': 'post',
+            'url': '/home/comprobar',
+            'data': { producto: $("#producto").val(), cantidad: $('#cantidad').val() },
+            'success': function (r) {
+                $("#idCodigo").val(r.result);
+                $("#tablaoculta").css("display", "block");
+            }
+        });
+    });
+</script>
+
+
+<script>
+    var priceElem;
     var priceObj;
 
     function priceCreate(args) {
@@ -36,8 +68,11 @@
 
                 var formEle = document.getElementById("Grid").querySelector("form").ej2_instances[0];
                 var totalCostFieldEle = formEle.getInputElement('Nombre');
+
+                //aca se pone el valor que viene de tu base
                 
-                totalCostFieldEle.value = "juan lobos";//aca se pone el valor que viene de tu base
+                totalCostFieldEle.value = "juan lobos";
+                var enable = true;
 
                 document.getElementById('GridNombre')[enable ? 'removeAttribute' : 'setAttribute']('disabled', 'disabled');
                 ej.base[enable ? "removeClass" : "addClass"](document.querySelectorAll('#GridNombre'), 'e-disabled');
@@ -54,4 +89,64 @@
 
     function priceRead(args) {
         return priceObj.value;
+    }</script>
+
+<script type="text/javascript">
+    window.customAdaptor = new ej.data.RemoteSaveAdaptor();
+
+    customAdaptor = ej.base.extend(customAdaptor, {
+        //consulta para insertar los datos del grid en la base
+        insert(dm, data, tableName) {
+            this.updateType = 'add';
+            return {
+                url: dm.dataSource.insertUrl || dm.dataSource.crudUrl || dm.dataSource.url,
+                data: $.param({
+                    value: data,
+                    table: tableName,
+                    idcodigo: $('#idCodigo').val()
+                }),
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
+            };
+        },
+        //consulta para actualizar los datos del grid en la base
+        update(dm, keyField, value, tableName) {
+            debugger;
+            this.updateType = 'update';
+            this.updateKey = keyField;
+            return {
+                type: 'POST',
+                url: dm.dataSource.updateUrl || dm.dataSource.crudUrl || dm.dataSource.url,
+                data: $.param({
+                    value: value,
+                    action: 'update',
+                    keyColumn: keyField,
+                    key: value[keyField],
+                    table: tableName
+                }),
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
+            };
+        },
+
+        //consulta para eliminar los datos del grid en la base
+        remove(dm, keyField, value, tableName) {
+            ej.data.JsonAdaptor.prototype.remove(dm, keyField, value);
+            return {
+                type: 'POST',
+                url: dm.dataSource.removeUrl || dm.dataSource.crudUrl || dm.dataSource.url,
+                data: $.param({
+                    //Added the anti-forgery token.
+                    key: value,
+                    keyColumn: keyField,
+                    table: tableName,
+                    action: 'remove'
+
+                }),
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8'
+            };
+        }
+
+    });
+
+    function load(args) {
+        this.dataSource.adaptor = customAdaptor;
     }</script>

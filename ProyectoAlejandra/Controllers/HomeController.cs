@@ -27,7 +27,24 @@ namespace ProyectoAlejandra.Controllers
 
         public IActionResult Index()
         {
+            var lista = _context.Persona.ToList();
+            ViewBag.data = lista.ToArray();
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult Comprobar(string producto,string cantidad)
+        {
+            return Json(new { result = "1" });
+        }
+
+        [HttpPost]
+        public ActionResult Insert(Persona value, string idcodigo)
+        {
+            string hagoloquequiero = idcodigo;//este seria el id de cabecera, puedo hacer lo que quiera con el
+            _context.Persona.Add(value);//inserto el registro en la base de datos
+            _context.SaveChanges();
+            return new JsonResult(value);
         }
 
         public IActionResult Privacy()
@@ -73,19 +90,19 @@ namespace ProyectoAlejandra.Controllers
         }
 
 
-        public ActionResult Insert([FromBody] CRUDAction<Persona> value)
+        //public ActionResult Insert([FromBody] CRUDAction<Persona> value,string cadena)
+        //{
+        //    //Persona.GetAllRecords().Insert(0, value.value);
+        //    _context.Persona.Add(value.value);//inserto el registro en la base de datos
+        //    _context.SaveChanges();
+        //    return new JsonResult(value.value);
+        //}
+
+
+
+        public ActionResult Update(Persona value)
         {
-            //Persona.GetAllRecords().Insert(0, value.value);
-            _context.Persona.Add(value.value);//inserto el registro en la base de datos
-            _context.SaveChanges();
-            return new JsonResult(value.value);
-        }
-
-
-
-        public ActionResult Update([FromBody] CRUDAction<Persona> value)
-        {
-            var ord = value.value;
+            var ord = value;
             ////////////////////////////////
             //aca va logica para actualizar
 
@@ -98,12 +115,12 @@ namespace ProyectoAlejandra.Controllers
             //val.Nombre = ord.Nombre;
             //val.Rut = ord.Rut;
 
-            return new JsonResult(value.value);
+            return new JsonResult(value);
         }
 
 
 
-        public ActionResult Delete([FromBody] CRUDAction<Persona> value)
+        public ActionResult Delete(Persona value)
         {
             ////////aca va logica para eliminar
 

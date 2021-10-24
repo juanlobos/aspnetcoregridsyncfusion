@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProyectoAlejandra.Models
 {
     public class Persona
     {
         public int Id { get; set; }
+        [Required(ErrorMessage = "El rut es necesario")]
         public string Rut { get; set; }
+        [Required(ErrorMessage = "El nombre es necesario")]
         public string Nombre { get; set; }
         public DateTime Fecha { get; set; }
         public bool Jubilado { get; set; }
